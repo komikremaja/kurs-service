@@ -6,11 +6,13 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -26,6 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypay.Exception.BadRequestException;
 import com.paypay.constant.VariableConstant;
 import com.paypay.dto.Response.Response;
+import com.paypay.dto.Response.ResponseData;
+import com.paypay.dto.Response.ResponseDataKursByDate;
 import com.paypay.dto.Response.ResponseKursBca;
 import com.paypay.model.KursData;
 import com.paypay.repository.BankDataRepo;
@@ -35,6 +39,9 @@ import com.paypay.repository.KursDataRepo;
 public class KursImpl {
 
     private Response response;
+
+    @Autowired
+    private ModelMapper mapper;
 
     @Autowired
     private KursDataRepo kursDataRepo;
@@ -104,7 +111,7 @@ public class KursImpl {
                     kursData.setIdBank(new BigDecimal("2"));
                 } else if (bankName.equalsIgnoreCase("Mandiri")) {
                     kursData.setIdBank(new BigDecimal("3"));
-                }else{
+                } else {
                     throw new BadRequestException("Nama Bank tidak tersedia");
                 }
                 if (bankName.equalsIgnoreCase("BRI")) {
@@ -165,7 +172,7 @@ public class KursImpl {
                     kursData.setIdBank(new BigDecimal("2"));
                 } else if (bankName.equalsIgnoreCase("Mandiri")) {
                     kursData.setIdBank(new BigDecimal("3"));
-                }else{
+                } else {
                     throw new BadRequestException("Nama Bank tidak tersedia");
                 }
                 if (bankName.equalsIgnoreCase("BRI")) {
@@ -225,7 +232,7 @@ public class KursImpl {
                     kursData.setIdBank(new BigDecimal("2"));
                 } else if (bankName.equalsIgnoreCase("Mandiri")) {
                     kursData.setIdBank(new BigDecimal("3"));
-                }else{
+                } else {
                     throw new BadRequestException("Nama Bank tidak tersedia");
                 }
                 if (bankName.equalsIgnoreCase("BRI")) {
@@ -274,5 +281,17 @@ public class KursImpl {
             }
         }
         return response = new Response(variableConstant.getSTATUS_OK(), "Success", kursDatas);
+    }
+
+    public Response inquiryKursThreeDays(Long days) throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threeDaysAgo = now.minus(days, ChronoUnit.DAYS);
+        List<KursData> kursData3Days = kursDataRepo.findByCreatedDateGreaterThanEqualAndIdBank(threeDaysAgo,
+                new BigDecimal("1"));
+        List<ResponseDataKursByDate> responseKurs = new ArrayList<>();
+        for (int i = 0; i < kursData3Days.size(); i++) {
+            responseKurs.add(mapper.map(kursData3Days.get(i), ResponseDataKursByDate.class));
+        }
+        return response = new Response(variableConstant.getSTATUS_OK(), "Success", responseKurs);
     }
 }

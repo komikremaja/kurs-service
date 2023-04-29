@@ -32,4 +32,11 @@ public class KursController {
         response = kursImpl.inquiryKursDetailBank(bankName);
         return response;
     }
+
+    
+    @GetMapping("/inquiry-kurs/{days}")
+    public Response inquiryKursPerDay(@PathVariable(name = "days") Long days) throws Exception {
+        response = kursImpl.inquiryKursThreeDays(days);
+        return response;
+    }
 }

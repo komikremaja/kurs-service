@@ -19,4 +19,6 @@ public interface KursDataRepo extends JpaRepository<KursData, BigDecimal>{
 
     @Query("SELECT DISTINCT createdDate FROM KursData s WHERE s.idBank=:idBank  order by 1 desc")
     List<LocalDateTime> findNewKurs(@Param("idBank")BigDecimal idBank);
+
+    List<KursData> findByCreatedDateGreaterThanEqualAndIdBank(LocalDateTime createdDate, BigDecimal idBank);
 }
